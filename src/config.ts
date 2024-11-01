@@ -1,3 +1,3 @@
 export const API_CONFIG = {
-  OLLAMA_URL: 'http://localhost:8000/api/generate'
+  OLLAMA_URL: 'https://cb3f-59-92-161-77.ngrok-free.app'
 };
