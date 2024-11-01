@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Brain, Loader2 } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
-import { API_CONFIG } from './config';
+import { generateText } from './services/ollamaService';
 import type { ChatState, Message } from './types';
 
 function App() {
@@ -32,23 +32,7 @@ function App() {
     }));
 
     try {
-      const response = await fetch(API_CONFIG.OLLAMA_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'llama3.2:1b',
-          prompt: content,
-          stream: false,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to connect to Ollama');
-      }
-
-      const data = await response.json();
+      const data = await generateText(content);
       
       const assistantMessage: Message = {
         role: 'assistant',
@@ -64,9 +48,7 @@ function App() {
       setChatState(prev => ({
         ...prev,
         isLoading: false,
-        error: import.meta.env.PROD 
-          ? 'Failed to connect to Ollama. Make sure it\'s running locally and accessible at http://localhost:11434'
-          : 'Failed to connect to Ollama. Make sure it\'s running locally.',
+        error: 'Failed to connect to AI service. Please try again later.',
       }));
     }
   };
@@ -77,12 +59,7 @@ function App() {
       <header className="bg-white border-b border-gray-200 p-4">
         <div className="max-w-4xl mx-auto flex items-center gap-2">
           <Brain className="w-8 h-8 text-blue-500" />
-          <h1 className="text-xl font-semibold">Local AI Chat</h1>
-          {import.meta.env.PROD && (
-            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-              Requires local Ollama instance
-            </span>
-          )}
+          <h1 className="text-xl font-semibold">AI Chat (Llama 3.2)</h1>
         </div>
       </header>
 
@@ -92,16 +69,8 @@ function App() {
           {chatState.messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
               <Brain className="w-12 h-12 mb-4" />
-              <p className="text-lg font-medium">Welcome to Local AI Chat!</p>
-              <p className="text-sm">Start a conversation with your local Ollama model.</p>
-              {import.meta.env.PROD && (
-                <div className="mt-4 p-4 bg-blue-50 text-blue-700 rounded-lg max-w-md text-center">
-                  <p className="font-medium mb-2">Important:</p>
-                  <p className="text-sm">
-                    Make sure Ollama is running locally on your machine at http://localhost:11434
-                  </p>
-                </div>
-              )}
+              <p className="text-lg font-medium">Welcome to AI Chat!</p>
+              <p className="text-sm">Start a conversation with Llama 3.2</p>
             </div>
           ) : (
             chatState.messages.map((message, index) => (
