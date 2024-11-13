@@ -1,3 +1,3 @@
 export const API_CONFIG = {
-  API_URL: 'https://ai-chat-blush.vercel.app/generate'
+  API_URL: 'http://localhost:8000/generate' // Replace with your local Ollama instance URL
 };

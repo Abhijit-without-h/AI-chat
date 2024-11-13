@@ -3,6 +3,7 @@ import { Brain, Loader2 } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { generateText } from './services/ollamaService';
+import { SpeechService } from './services/speechService';
 import type { ChatState, Message } from './types';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
     error: null,
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const speechService = useRef(new SpeechService());
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,33 +46,34 @@ function App() {
         messages: [...prev.messages, assistantMessage],
         isLoading: false,
       }));
+
+      // Automatically speak the assistant's response
+      speechService.current.speak(data.response);
     } catch (error) {
       setChatState(prev => ({
         ...prev,
         isLoading: false,
-        error: 'Failed to connect to AI service. Please try again later.',
+        error: 'Failed to connect to Ollama service. Please ensure Ollama is running locally.',
       }));
     }
   };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 p-4">
         <div className="max-w-4xl mx-auto flex items-center gap-2">
           <Brain className="w-8 h-8 text-blue-500" />
-          <h1 className="text-xl font-semibold">AI Chat (Llama 3.2)</h1>
+          <h1 className="text-xl font-semibold">AI Chat with Voice</h1>
         </div>
       </header>
 
-      {/* Chat Messages */}
       <div className="flex-grow overflow-auto">
         <div className="max-w-4xl mx-auto">
           {chatState.messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8">
               <Brain className="w-12 h-12 mb-4" />
-              <p className="text-lg font-medium">Welcome to AI Chat!</p>
-              <p className="text-sm">Start a conversation with Llama 3.2</p>
+              <p className="text-lg font-medium">Welcome to Voice-Enabled AI Chat!</p>
+              <p className="text-sm">Start talking or typing to interact with the AI</p>
             </div>
           ) : (
             chatState.messages.map((message, index) => (
@@ -92,7 +95,6 @@ function App() {
         </div>
       </div>
 
-      {/* Chat Input */}
       <ChatInput onSend={handleSend} disabled={chatState.isLoading} />
     </div>
   );

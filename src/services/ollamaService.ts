@@ -1,27 +1,30 @@
-import { API_CONFIG } from '../config';
 
 export interface GenerateTextResponse {
   response: string;
-  model: string;
-  created_at: string;
-  done: boolean;
 }
 
 export async function generateText(prompt: string): Promise<GenerateTextResponse> {
-  const response = await fetch(API_CONFIG.API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      prompt: prompt,
-      model: 'llama3.2:1b'
-    }),
-  });
+  try {
+    const response = await fetch('http://localhost:11434/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "llama3.2:1b",
+        prompt: prompt,
+        stream: false
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to connect to AI service');
+    if (!response.ok) {
+      throw new Error('Failed to connect to Ollama');
+    }
+
+    const data = await response.json();
+    return { response: data.response };
+  } catch (error) {
+    console.error('Error:', error);
+    throw new Error('Failed to connect to local Ollama service');
   }
-
-  return response.json();
 }
